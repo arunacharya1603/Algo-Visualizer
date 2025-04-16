@@ -109,8 +109,28 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ explanation, currentLine, algorit
     'return mergeSort(arr);',
     '}'
   ];
-  
 
+  const shellSortCode = [
+    'function shellSort(arr) {',
+    '  let gap = Math.floor(arr.length / 2);',
+    '  while (gap > 0) {',
+    '    for (let i = gap; i < arr.length; i++) {',
+    '      let current = arr[i];',
+    '      let j = i;',
+    '      while (j >= gap && arr[j - gap] > current) {',
+    '        arr[j] = arr[j - gap];',
+    '        j -= gap;',
+    '      }',
+    '      arr[j] = current;',
+    '    }',
+    '    gap = Math.floor(gap / 2);',
+    '  }',
+    '  return arr;',
+    '}'
+  ];
+
+  
+  
   // Get the appropriate code based on the selected algorithm
   const getAlgorithmCode = () => {
     switch (algorithm) {
@@ -124,6 +144,8 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ explanation, currentLine, algorit
         return quickSortCode;
       case "mergeSort":
         return mergeSortCode;
+      case "shellSort":
+        return shellSortCode;
       // Add other algorithms as they are implemented
       default:
         return bubbleSortCode;

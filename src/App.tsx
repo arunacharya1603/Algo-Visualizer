@@ -7,6 +7,8 @@ import { insertionSortSteps } from './algorithms/insertionSort';
 import { selectionSortSteps } from './algorithms/selectionSort';
 import { quickSortSteps } from './algorithms/quickSort';
 import { mergeSortSteps } from './algorithms/mergeSort';
+import { shellSortSteps } from './algorithms/shellSort';
+
 function App() {
   const [array, setArray] = useState<number[]>([]);
   const [steps, setSteps] = useState<any[]>([]);
@@ -52,6 +54,9 @@ function App() {
         break;
       case "mergeSort":
         sortSteps = mergeSortSteps([...arr]);
+        break;
+      case "shellSort":
+        sortSteps = shellSortSteps([...arr]);
         break;
       // Add other cases
       default:
@@ -101,6 +106,7 @@ function App() {
             <option value="selectionSort">Selection Sort</option>
             <option value="quickSort">Quick Sort</option>
             <option value="mergeSort">Merge Sort</option>
+            <option value="shellSort">Shell Sort</option>
           </select>
         </div>
         
