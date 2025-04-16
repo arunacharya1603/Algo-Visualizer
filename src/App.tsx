@@ -8,6 +8,8 @@ import { selectionSortSteps } from './algorithms/selectionSort';
 import { quickSortSteps } from './algorithms/quickSort';
 import { mergeSortSteps } from './algorithms/mergeSort';
 import { shellSortSteps } from './algorithms/shellSort';
+import { binarySearchSteps, generateRandomBinarySearchExample } from './algorithms/binarySearch';
+import GraphVisualizer from './components/GraphVisualizer';
 
 function App() {
   const [array, setArray] = useState<number[]>([]);
@@ -16,6 +18,7 @@ function App() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [speed, setSpeed] = useState<number>(1000);
   const [algorithm, setAlgorithm] = useState<string>("bubbleSort");
+  const [searchTarget, setSearchTarget] = useState<number | null>(null);
 
   useEffect(() => {
     generateNewArray();
@@ -32,12 +35,19 @@ function App() {
   }, [isPlaying, currentStep, steps.length, speed]);
 
   const generateNewArray = () => {
-    const newArray = Array.from({ length: 8 }, () => Math.floor(Math.random() * 50) + 1);
-    setArray(newArray);
-    generateSteps(newArray);
+    if (algorithm === "binarySearch") {
+      const { array: newArray, target } = generateRandomBinarySearchExample();
+      setArray(newArray);
+      setSearchTarget(target);
+      generateSteps(newArray, target);
+    } else {
+      const newArray = Array.from({ length: 8 }, () => Math.floor(Math.random() * 50) + 1);
+      setArray(newArray);
+      generateSteps(newArray);
+    }
   };
 
-  const generateSteps = (arr: number[]) => {
+  const generateSteps = (arr: number[], target?: number) => {
     let sortSteps;
     switch (algorithm) {
       case "bubbleSort":
@@ -58,6 +68,14 @@ function App() {
       case "shellSort":
         sortSteps = shellSortSteps([...arr]);
         break;
+      case "binarySearch":
+        if (target !== undefined) {
+          sortSteps = binarySearchSteps([...arr], target);
+        } else {
+          // Default target if none provided
+          sortSteps = binarySearchSteps([...arr], arr[Math.floor(Math.random() * arr.length)]);
+        }
+        break;
       // Add other cases
       default:
         sortSteps = bubbleSortSteps([...arr]);
@@ -70,7 +88,7 @@ function App() {
 
   const handleAlgorithmChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAlgorithm(e.target.value);
-    generateSteps(array);
+    generateNewArray(); // Generate a new array for the selected algorithm
   };
 
   const handlePlayPause = () => {
@@ -87,6 +105,9 @@ function App() {
       setCurrentStep(currentStep + 1);
     }
   };
+
+  const isBinarySearch = algorithm === "binarySearch";
+  const isPathFinding = algorithm.includes("Path");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100">
@@ -107,25 +128,49 @@ function App() {
             <option value="quickSort">Quick Sort</option>
             <option value="mergeSort">Merge Sort</option>
             <option value="shellSort">Shell Sort</option>
+            <option value="binarySearch">Binary Search</option>
           </select>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="md:text-2xl text-xl font-semibold text-indigo-800 mb-6">
-              {algorithm === "bubbleSort" ? "Bubble Sort" : 
-               algorithm === "insertionSort" ? "Insertion Sort" : 
-               algorithm === "selectionSort" ? "Selection Sort" : 
-               algorithm === "quickSort" ? "Quick Sort" : 
-               algorithm === "mergeSort" ? "Merge Sort" : ""} Visualization
+              {isPathFinding ? "Path Finding Visualization" : 
+               isBinarySearch ? "Binary Search Visualization" : 
+               "Sorting Visualization"}
             </h2>
-            <div className="mb-8">
-              <ArrayVisualizer 
-                array={steps[currentStep]?.array || array}
-                comparing={steps[currentStep]?.comparing}
-                swapping={steps[currentStep]?.swapping}
+            
+            {isPathFinding ? (
+              <GraphVisualizer 
+                graph={steps[currentStep]?.graph}
+                visitedNodes={steps[currentStep]?.visited}
+                currentNode={steps[currentStep]?.current}
+                shortestPath={steps[currentStep]?.shortestPath}
               />
-            </div>
+            ) : (
+              <div>
+                {isBinarySearch && searchTarget !== null && (
+                  <div className="text-center mb-4 p-2 bg-indigo-50 rounded-lg">
+                    <span className="font-medium">Target value: </span>
+                    <span className="font-bold text-indigo-700">{searchTarget}</span>
+                  </div>
+                )}
+                <ArrayVisualizer 
+                  array={steps[currentStep]?.array || array}
+                  comparing={steps[currentStep]?.comparing || (isBinarySearch && steps[currentStep]?.mid !== undefined ? [steps[currentStep]?.mid] : undefined)}
+                  swapping={steps[currentStep]?.swapping || (isBinarySearch && steps[currentStep]?.found === true ? [steps[currentStep]?.mid] : undefined)}
+                />
+                {isBinarySearch && steps[currentStep] && (
+                  <div className="mt-4 text-center">
+                    <p className="text-sm">
+                      <span className="font-medium">Left:</span> {steps[currentStep].left}, 
+                      <span className="font-medium ml-2">Right:</span> {steps[currentStep].right}, 
+                      <span className="font-medium ml-2">Mid:</span> {steps[currentStep].mid}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
             
             <div className="flex items-center justify-center gap-4 mb-6">
               <button
@@ -160,7 +205,7 @@ function App() {
                 onClick={generateNewArray}
                 className="sm:px-4 px-1.5 sm:py-2 py-1.5 text-sm sm:text-lg bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
               >
-                Generate New Array
+                {isBinarySearch ? "Generate New Example" : "Generate New Array"}
               </button>
               <select
                 value={speed}

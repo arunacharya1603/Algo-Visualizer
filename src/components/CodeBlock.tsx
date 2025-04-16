@@ -129,7 +129,25 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ explanation, currentLine, algorit
     '}'
   ];
 
-  
+  const binarySearchCode = [
+    'function binarySearch(arr, target) {',
+    '  let left = 0;',
+    '  let right = arr.length - 1;',
+    '  while (left <= right) {',
+    '    const mid = Math.floor((left + right) / 2);',
+    '    if (arr[mid] === target) {',
+    '      return mid;',
+    '    } else if (arr[mid] < target) {',
+    '      left = mid + 1;',
+    '    } else {',
+    '      right = mid - 1;',
+    '    }',
+    '  }',
+    '  return -1;',
+    '}',
+    'return binarySearch(arr, target);',
+    '}'
+  ];
   
   // Get the appropriate code based on the selected algorithm
   const getAlgorithmCode = () => {
@@ -146,6 +164,8 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ explanation, currentLine, algorit
         return mergeSortCode;
       case "shellSort":
         return shellSortCode;
+      case "binarySearch":
+        return binarySearchCode;
       // Add other algorithms as they are implemented
       default:
         return bubbleSortCode;
